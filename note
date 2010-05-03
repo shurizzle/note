@@ -85,7 +85,7 @@ delete_note ()
         error "You really asshole, this note doesn't exists >.>\n"
     fi
 
-    DATE="$(cat "${NFILE}" | awk -F"\x0" "(NR == ${num}) {print \$1}" | sed 's/\//\\\//g')"
+    local DATE="$(cat "${NFILE}" | awk -F"\x0" "(NR == ${num}) {print \$1}" | sed 's/\//\\\//g')"
     sed -i "s/.*${DATE}.*//g;/^$/d" "${NFILE}"
     alert "Note deleted successfully\n"
 }
