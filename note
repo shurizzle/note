@@ -27,7 +27,13 @@ new_note ()
             TEXT+="\n${i}"
         fi
     done
+    new_note_cmd "${TITLE}" "${TEXT}"
+}
 
+new_note_cmd ()
+{
+    local TITLE="${1}"
+    local TEXT="${2}"
     local DATE=$(date +'%d/%m/%Y %H:%M:%S')
 
     if [[ -z "${TITLE}" ]]; then
@@ -46,14 +52,23 @@ new_note ()
 list_notes ()
 {
     alert "Notes:\n"
+    if [[ "0" = $(wc -l "${NFILE}" | awk '{print $1}') ]]; then
+        echo "No notes"
+    fi
     cat "${NFILE}" | awk -F"\x0" '{print "\t", NR, "\t", $2}'
 }
 
-show_note ()
+show_note_cmd ()
 {
     local num
     alert "Note number: "
     read num
+    show_note_cmd "${num}"
+}
+
+show_note_cmd ()
+{
+    local num="${1}"
 
     if [[ ! -z "$(echo "${num}" | sed 's/[0-9]//g')" ]]; then
         error "You fag, insert a number, idiot\n"
@@ -76,7 +91,12 @@ delete_note ()
     local num
     alert "Note number: "
     read num
+    delete_note_cmd "${num}"
+}
 
+delete_note_cmd ()
+{
+    local num="${1}"
     if [[ ! -z "$(echo "${num}" | sed 's/[0-9]//g')" ]]; then
         error "You fag, insert a number, idiot\n"
     fi
@@ -100,33 +120,57 @@ show_help ()
     echo "    -s    Show note"
     echo "    -d    Delete note"
     echo "    -h    Show this help"
+    echo "NON-INTERACTIVE MODE:"
+    echo "    -n <title> <text>     Insert new note"
+    echo "    -s <number>           Show note"
+    echo "    -d <number>           Delete note"
 }
 
 if [[ "$#" = "0" ]]; then
     new_note
 fi
 
-if [[ "$#" != "1" ]]; then
-    error "HURR see help DURR\n"
+if [[ "$#" = "1" ]]; then
+    case "${1}" in
+        -n)
+            new_note
+        ;;
+        -l)
+            list_notes
+        ;;
+        -s)
+            show_note
+        ;;
+        -d)
+            delete_note
+        ;;
+        -h)
+            show_help
+        ;;
+        *)
+            error "HURR see help DURR\n"
+        ;;
+    esac
+    exit
 fi
 
 case "${1}" in
     -n)
-        new_note
-    ;;
-    -l)
-        list_notes
+        if [[ "$#" != "3" ]]; then
+            error "I wonna know why you are so gay\n"
+        fi
+        new_note_cmd "${2}" "${3}"
     ;;
     -s)
-        show_note
+        if [[ "$#" != "2" ]]; then
+            error "I wonna know why you are so gay\n"
+        fi
+        show_note_cmd "${2}"
     ;;
     -d)
-        delete_note
-    ;;
-    -h)
-        show_help
-    ;;
-    *)
-        error "HURR see help DURR\n"
+        if [[ "$#" != "2" ]]; then
+            error "I wonna know why you are so gay\n"
+        fi
+        delete_note_cmd "${2}"
     ;;
 esac
