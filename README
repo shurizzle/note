@@ -1,0 +1,12 @@
+'note' is simply a bash-written notes' tracker
+I've written this shit 'cause my home dir is full of
+shitty note files and I hate disorder >.>
+
+To install:
+    make install
+To uninstall:
+    make uninstall
+
+Simply
+
+Bai :D

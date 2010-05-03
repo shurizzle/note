@@ -1,0 +1,132 @@
+#!/bin/bash
+
+NFILE="${HOME}/.notes"
+
+alert ()
+{
+    echo -ne "\e[34;1m->\e[0m ${1}"
+}
+
+error ()
+{
+    echo -ne "\n\e[31;1mERROR:\e[0m ${1}"
+    exit
+}
+
+new_note ()
+{
+    local TITLE=""
+    local TEXT=""
+    alert "Title: "
+    read TITLE
+    alert "Text: "
+    while read i; do
+        if [[ -z ${TEXT} ]]; then
+            TEXT="${i}"
+        else
+            TEXT+="\n${i}"
+        fi
+    done
+
+    local DATE=$(date +'%d/%m/%Y %H:%M:%S')
+
+    if [[ -z "${TITLE}" ]]; then
+        TITLE="Untitled"
+    fi
+
+    if [[ -z "${TEXT}" ]]; then
+        error "You gay, insert the body of note -.-\n"
+    fi
+
+    TEXT=$(echo -ne "${TEXT}" | tr "\n" "\1")
+    echo -e "${DATE}\0${TITLE}\0${TEXT}" | sed -r 's/\s+$//g' >> "${NFILE}"
+    alert "Note correctly inserted :D\n"
+}
+
+list_notes ()
+{
+    alert "Notes:\n"
+    cat "${NFILE}" | awk -F"\x0" '{print "\t", NR, "\t", $2}'
+}
+
+show_note ()
+{
+    local num
+    alert "Note number: "
+    read num
+
+    if [[ ! -z "$(echo "${num}" | sed 's/[0-9]//g')" ]]; then
+        error "You fag, insert a number, idiot\n"
+    fi
+
+    if [[ ${num} -gt $(wc -l "${NFILE}" | awk '{print $1}') ]]; then
+        error "You really asshole, this note doesn't exists >.>\n"
+    fi
+
+    alert "Data: "
+    cat "${NFILE}" | awk -F"\x0" "(NR == ${num}) { print \$1 }"
+    alert "Title: "
+    cat "${NFILE}" | awk -F"\x0" "(NR == ${num}) { print \$2 }"
+    alert "Text: "
+    cat "${NFILE}" | awk -F"\x0" "(NR == ${num}) { print \$3 }" | tr "\1" "\n"
+}
+
+delete_note ()
+{
+    local num
+    alert "Note number: "
+    read num
+
+    if [[ ! -z "$(echo "${num}" | sed 's/[0-9]//g')" ]]; then
+        error "You fag, insert a number, idiot\n"
+    fi
+
+    if [[ ${num} -gt $(wc -l "${NFILE}" | awk '{print $1}') ]]; then
+        error "You really asshole, this note doesn't exists >.>\n"
+    fi
+
+    DATE="$(cat "${NFILE}" | awk -F"\x0" "(NR == ${num}) {print \$1}" | sed 's/\//\\\//g')"
+    sed -i "s/.*${DATE}.*//g;/^$/d" "${NFILE}"
+    alert "Note deleted successfully\n"
+}
+
+show_help ()
+{
+    echo "USAGE ${0} [-n|-l|-s|-d|-h]"
+    echo "  no arguments mean -n"
+    echo
+    echo "    -n    Insert new note"
+    echo "    -l    List notes"
+    echo "    -s    Show note"
+    echo "    -d    Delete note"
+    echo "    -h    Show this help"
+}
+
+if [[ "$#" = "0" ]]; then
+    new_note
+fi
+
+if [[ "$#" != "1" ]]; then
+    error "HURR see help DURR\n"
+fi
+
+case "${1}" in
+    -n)
+        new_note
+    ;;
+    -l)
+        list_notes
+    ;;
+    -s)
+        show_note
+    ;;
+    -d)
+        delete_note
+    ;;
+    -h)
+        show_help
+    ;;
+    *)
+        error "HURR see help DURR\n"
+    ;;
+esac
