@@ -5,7 +5,8 @@ VERSION = 1.0
 DESTDIR ?=  /usr/local/bin
 EXECUTABLE = note
 
-all: install
+all:
+	@echo "If you don't know is only a bash file..."
 
 install:
 	@echo "Installing $(EXECUTABLE) in $(DESTDIR)"

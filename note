@@ -115,7 +115,7 @@ show_help ()
     echo "USAGE ${0} [-n|-l|-s|-d|-h]"
     echo "  no arguments mean -n"
     echo
-    echo "    -n    Insert new note"
+    echo "    -n    Insert new note (to stop insert send a EOF char, ^D aka Ctrl + D)"
     echo "    -l    List notes"
     echo "    -s    Show note"
     echo "    -d    Delete note"
