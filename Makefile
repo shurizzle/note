@@ -19,7 +19,7 @@ uninstall:
 dist:
 	@echo "Making tarball package"
 	@mkdir -p "$(EXECUTABLE)-$(VERSION)"
-	@cp Makefile $(EXECUTABLE) "$(EXECUTABLE)-$(VERSION)"
+	@cp README Makefile $(EXECUTABLE) "$(EXECUTABLE)-$(VERSION)"
 	@tar -cf "$(EXECUTABLE)-$(VERSION).tar" "$(EXECUTABLE)-$(VERSION)"
 	@rm -R "$(EXECUTABLE)-$(VERSION)"
 	@gzip "$(EXECUTABLE)-$(VERSION).tar"
