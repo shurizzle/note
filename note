@@ -89,25 +89,47 @@ show_note_cmd ()
 delete_note ()
 {
     local num
-    alert "Note number: "
+    alert "Note[s] number: "
     read num
-    delete_note_cmd "${num}"
+    num=$(echo "${num}" | sed -r 's/\s/ /g')
+    eval "delete_note_cmd ${num}"
 }
 
 delete_note_cmd ()
 {
-    local num="${1}"
-    if [[ ! -z "$(echo "${num}" | sed 's/[0-9]//g')" ]]; then
-        error "You fag, insert a number, idiot\n"
-    fi
+    local n
+    local j
+    local d=0
+    local POSTS=""
+    for i in $(seq 1 $#); do
+        eval "n=\"\$${i}\""
 
-    if [[ ${num} -gt $(wc -l "${NFILE}" | awk '{print $1}') ]]; then
-        error "You really asshole, this note doesn't exists >.>\n"
-    fi
+        if [[ ! -z "$(echo "${n}" | sed 's/[0-9.]//g')" ]]; then
+            error "You fag, insert one or more numbers or ranges, idiot\n"
+        fi
 
-    local DATE="$(cat "${NFILE}" | awk -F"\x0" "(NR == ${num}) {print \$1}" | sed 's/\//\\\//g')"
-    sed -i "s/.*${DATE}.*//g;/^$/d" "${NFILE}"
-    alert "Note deleted successfully\n"
+        if [[ ! -z "$(echo ${n} | sed 's/[0-9]//g')" ]]; then
+            for j in `seq $(echo ${n} | sed 's/\.\..*//') $(echo ${n} | sed 's/.*\.\.//')`; do
+                POSTS+="${j}\n"
+            done
+        else
+            POSTS+="${n}\n"
+        fi
+    done
+
+    for i in $(echo -e "${POSTS}" | sort -n); do
+        n=$((i - d))
+
+        if [[ ${n} -gt $(wc -l "${NFILE}" | awk '{print $1}') ]]; then
+            error "You really asshole, this note doesn't exists >.>\n"
+        fi
+
+        local DATE="$(cat "${NFILE}" | awk -F"\x0" "(NR == ${n}) {print \$1}" | sed 's/\//\\\//g')"
+        sed -i "s/.*${DATE}.*//g;/^$/d" "${NFILE}"
+        let d+=1
+    done
+
+    alert "Note[s] deleted successfully\n"
 }
 
 show_help ()
@@ -118,13 +140,16 @@ show_help ()
     echo "    -n    Insert new note (to stop insert send a EOF char, ^D aka Ctrl + D)"
     echo "    -l    List notes"
     echo "    -s    Show note"
-    echo "    -d    Delete note"
+    echo "    -d    Delete note[s]"
     echo "    -h    Show this help"
     echo "NON-INTERACTIVE MODE:"
-    echo "    -n <title> <text>     Insert new note"
-    echo "    -s <number>           Show note"
-    echo "    -d <number>           Delete note"
+    echo "    -n <title> <text>             Insert new note"
+    echo "    -s <number>                   Show note"
+    echo "    -d (<first..last><number>)    Delete note[s]"
 }
+
+#delete_note_cmd 0..5 12 18
+#exit
 
 if [[ "$#" = "0" ]]; then
     new_note
@@ -168,9 +193,10 @@ case "${1}" in
         show_note_cmd "${2}"
     ;;
     -d)
-        if [[ "$#" != "2" ]]; then
+        if [[ "$#" -lt "2" ]]; then
             error "I wonna know why you are so gay\n"
         fi
-        delete_note_cmd "${2}"
+        shift
+        delete_note_cmd "$@"
     ;;
 esac

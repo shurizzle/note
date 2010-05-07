@@ -1,6 +1,6 @@
 #Makefile of note
 
-VERSION = 1.1
+VERSION = 1.2
 
 DESTDIR ?=  /usr/local/bin
 EXECUTABLE = note
