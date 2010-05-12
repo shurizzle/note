@@ -58,7 +58,7 @@ list_notes ()
     cat "${NFILE}" | awk -F"\x0" '{print "\t", NR, "\t", $2}'
 }
 
-show_note_cmd ()
+show_note ()
 {
     local num
     alert "Note number: "
