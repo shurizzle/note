@@ -148,8 +148,6 @@ show_help ()
     echo "    -d (<first..last><number>)    Delete note[s]"
 }
 
-#delete_note_cmd 0..5 12 18
-#exit
 
 if [[ "$#" = "0" ]]; then
     new_note
